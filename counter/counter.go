@@ -2,19 +2,19 @@ package counter
 
 import (
 	"fmt"
-	"github.com/gerardva/go-counter-api/cache"
 	"github.com/gerardva/go-counter-api/config"
+	"github.com/gerardva/go-counter-api/redis"
 )
 
 func Increment() {
 	var configs = config.GetConfig()
-	cache.Increment(configs.TotalCountKey)
-	cache.Increment(getInstanceKey())
+	redis.Increment(configs.TotalCountKey)
+	redis.Increment(getInstanceKey())
 }
 
 func GetTotal() int64 {
 	var configs = config.GetConfig()
-	count, err := cache.GetInt(configs.TotalCountKey)
+	count, err := redis.GetInt(configs.TotalCountKey)
 	if err != nil {
 		count = 0
 	}
@@ -23,7 +23,7 @@ func GetTotal() int64 {
 }
 
 func GetInstanceCount() int64 {
-	count, err := cache.GetInt(getInstanceKey())
+	count, err := redis.GetInt(getInstanceKey())
 	if err != nil {
 		count = 0
 	}

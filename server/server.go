@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/gerardva/go-counter-api/controllers"
+	"github.com/gerardva/go-counter-api/controller"
 	"github.com/gerardva/go-counter-api/middleware"
 	"github.com/gin-gonic/gin"
 )
@@ -9,10 +9,10 @@ import (
 func Init() {
 	r := gin.Default()
 	r.Use(middleware.CountMiddleware())
-	health := new(controllers.HealthController)
+	health := new(controller.HealthController)
 	r.GET("/health", health.Check)
 
-	count := new(controllers.CountController)
+	count := new(controller.CountController)
 	r.GET("/", count.Check)
 
 	r.Run()
