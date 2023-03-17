@@ -2,38 +2,23 @@ package redis
 
 import (
 	"context"
-	"github.com/gerardva/go-counter-api/config"
 	"github.com/redis/go-redis/v9"
 	"strconv"
 )
 
-var rdb *redis.Client
-
-func Init() {
-	configuration := config.GetConfig()
-	connect(configuration)
+type CacheClient struct {
+	rdb *redis.Client
 }
 
-func Increment(key string) {
-	var ctx = context.Background()
-	rdb.Incr(ctx, key)
+type Cache interface {
+	Increment(key string)
+	GetInt(key string) (val int64, err error)
 }
 
-func GetInt(key string) (val int64, err error) {
-	var ctx = context.Background()
-	out, err := rdb.Get(ctx, key).Result()
-	if err != nil {
-		return
-	}
-
-	val, err = strconv.ParseInt(out, 10, 0)
-	return
-}
-
-func connect(config *config.Config) {
-	rdb = redis.NewClient(&redis.Options{
-		Addr:     config.CacheHost,
-		Password: config.CachePassword,
+func NewCacheClient(host string, password string) *CacheClient {
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     host,
+		Password: password,
 		DB:       0,
 	})
 
@@ -42,4 +27,24 @@ func connect(config *config.Config) {
 	if err != nil {
 		panic(err)
 	}
+
+	return &CacheClient{
+		rdb: rdb,
+	}
+}
+
+func (c *CacheClient) Increment(key string) {
+	var ctx = context.Background()
+	c.rdb.Incr(ctx, key)
+}
+
+func (c *CacheClient) GetInt(key string) (val int64, err error) {
+	var ctx = context.Background()
+	out, err := c.rdb.Get(ctx, key).Result()
+	if err != nil {
+		return
+	}
+
+	val, err = strconv.ParseInt(out, 10, 0)
+	return
 }

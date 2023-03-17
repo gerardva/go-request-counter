@@ -6,15 +6,31 @@ import (
 	"github.com/gerardva/go-counter-api/redis"
 )
 
-func Increment() {
-	var configs = config.GetConfig()
-	redis.Increment(configs.TotalCountKey)
-	redis.Increment(getInstanceKey())
+type RequestCounter struct {
+	cache redis.Cache
 }
 
-func GetTotal() int64 {
+type Counter interface {
+	Increment()
+	GetTotal() int64
+	GetInstanceCount() int64
+}
+
+func NewRequestCounter(cache redis.Cache) *RequestCounter {
+	return &RequestCounter{
+		cache: cache,
+	}
+}
+
+func (c *RequestCounter) Increment() {
 	var configs = config.GetConfig()
-	count, err := redis.GetInt(configs.TotalCountKey)
+	c.cache.Increment(configs.TotalCountKey)
+	c.cache.Increment(getInstanceKey())
+}
+
+func (c *RequestCounter) GetTotal() int64 {
+	var configs = config.GetConfig()
+	count, err := c.cache.GetInt(configs.TotalCountKey)
 	if err != nil {
 		count = 0
 	}
@@ -22,8 +38,8 @@ func GetTotal() int64 {
 	return count
 }
 
-func GetInstanceCount() int64 {
-	count, err := redis.GetInt(getInstanceKey())
+func (c *RequestCounter) GetInstanceCount() int64 {
+	count, err := c.cache.GetInt(getInstanceKey())
 	if err != nil {
 		count = 0
 	}

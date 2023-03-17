@@ -6,9 +6,9 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func CountMiddleware() gin.HandlerFunc {
+func CountMiddleware(count counter.Counter) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		counter.Increment()
+		count.Increment()
 		fmt.Printf("Incremented counter")
 	}
 }

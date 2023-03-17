@@ -8,12 +8,21 @@ import (
 	"net/http"
 )
 
-type CountController struct{}
+type CountController struct {
+	count counter.Counter
+}
+
+func NewCountController(count counter.Counter) *CountController {
+	return &CountController{
+		count: count,
+	}
+}
 
 func (h CountController) Check(c *gin.Context) {
-	instanceCount := counter.GetInstanceCount()
-	totalCount := counter.GetTotal()
+	instanceCount := h.count.GetInstanceCount()
+	totalCount := h.count.GetTotal()
 	instanceName := config.GetConfig().Hostname
 
-	c.String(http.StatusOK, fmt.Sprintf("You are talking to instance %s.\nThis is request %d to this instance and request %d to the cluster.", instanceName, instanceCount, totalCount))
+	output := fmt.Sprintf("You are talking to instance %s.\nThis is request %d to this instance and request %d to the cluster.", instanceName, instanceCount, totalCount)
+	c.String(http.StatusOK, output)
 }

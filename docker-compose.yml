@@ -11,7 +11,7 @@ services:
     depends_on:
       - cache
     deploy:
-      replicas: 1
+      replicas: 3
   cache:
     image: redis:6.2-alpine
     restart: always
